@@ -80,14 +80,21 @@ app.get("/", function(req, res){
 app.post("/", function(req, res){
 
 
-  let item = req.body.newItem;
-    if (req.body.list === "Work List"){
-      workItems.push(item);
-      res.redirect("/work");
-    } else {
-      items.push(item);
-      res.redirect("/");
-    }
+  let newTask = req.body.newItem;
+    // if (req.body.list === "Work List"){
+    //   workItems.push(item);
+    //   res.redirect("/work");
+    // } else {
+    //   items.push(item);
+    //   res.redirect("/");
+    // }
+
+    itemy = new Todo({
+      name: newTask
+    })
+
+    itemy.save()
+    res.redirect('/')
 
 });
 
