@@ -16,10 +16,10 @@ const app = express();
 
 // New items can be pushed to an array that is a const variable, but
 // the variable cannot be reassigned
-const items = ["Work Out",
-              "Read the first chapter of 'Growth: From Microorganisms to Megacities'",
-              "Code for 2 hours"
-            ];
+// const items = ["Work Out",
+//               "Read the first chapter of 'Growth: From Microorganisms to Megacities'",
+//               "Code for 2 hours"
+//             ];
 const workItems = [];
 
 const todoSchema = new mongoose.Schema({
@@ -49,7 +49,7 @@ const item3 = new Todo({
 
 const defaultItems = [item1, item2, item3];
 
-console.log(defaultItems);
+// console.log(defaultItems);
 
 // Todo.insertMany([
 //   {name: 'Code for 2 hours'},
@@ -66,7 +66,7 @@ app.get("/", function(req, res){
   let day = date.getDate();
   Todo.find().then((Todoitems) => {
     if (Todoitems.length === 0) {
-      Todo.insertMany(defaultItems).then((data) => console.log(data))
+      Todo.insertMany(defaultItems).then(() => console.log(""))
       res.redirect("/")
     } else {
       res.render('list', {listTitle: day, newListItems: Todoitems})
@@ -97,6 +97,14 @@ app.post("/", function(req, res){
     res.redirect('/')
 
 });
+
+app.post("/delete", function(req, res){
+  const checkedItem = req.body.checkbox
+  Todo.deleteOne({_id: checkedItem})
+  .then((data) => console.log(data, 'Successfully deleted'))
+  .catch((err) => console.log(err))
+  res.redirect("/");
+})
 
 
 app.get("/work", function(req, res){
