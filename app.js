@@ -14,13 +14,6 @@ mongoose.connect('mongodb://localhost:27017/todoListDB', {
 
 const app = express();
 
-// New items can be pushed to an array that is a const variable, but
-// the variable cannot be reassigned
-// const items = ["Work Out",
-//               "Read the first chapter of 'Growth: From Microorganisms to Megacities'",
-//               "Code for 2 hours"
-//             ];
-const workItems = [];
 
 const todoSchema = new mongoose.Schema({
   name: {
@@ -59,17 +52,6 @@ const item3 = new Todo({
 
 const defaultItems = [item1, item2, item3];
 
-// console.log(defaultItems);
-
-// Todo.insertMany([
-//   {name: 'Code for 2 hours'},
-//   {name: 'Iron all washed clothes'},
-//   {name: 'Go shopping'},
-//   {name: 'Complete pending school projects'}
-// ]).then((data) => console.log(data))
-
-//
-
 
 app.get("/", function(req, res){
 
@@ -82,7 +64,6 @@ app.get("/", function(req, res){
       res.render('list', {listTitle: day, newListItems: Todoitems})
     }
   })
-  // res.render('list', {listTitle: day, newListItems: items})
 
 
 });
@@ -113,42 +94,53 @@ app.get("/:customListName", function(req, res){
   })
 
 
-
-
-
 app.post("/", function(req, res){
 
 
-  let newTask = req.body.newItem;
-    // if (req.body.list === "Work List"){
-    //   workItems.push(item);
-    //   res.redirect("/work");
-    // } else {
-    //   items.push(item);
-    //   res.redirect("/");
-    // }
+  const newTask = req.body.newItem;
+  const listName = req.body.list;
 
     itemy = new Todo({
       name: newTask
     })
 
-    itemy.save()
-    res.redirect('/')
+    if (listName === "Today") {
+      itemy.save();
+      res.redirect('/');
+    } else {
+      Listy.findOne({name: listName}).then(fItem => {
+        fItem.items.push(itemy);
+        fItem.save();
+        res.redirect("/" + listName);
+      })
+    }
 
 });
 
 app.post("/delete", function(req, res){
   const checkedItem = req.body.checkbox
-  Todo.deleteOne({_id: checkedItem})
-  .then((data) => console.log(data, 'Successfully deleted'))
-  .catch((err) => console.log(err))
-  res.redirect("/");
+  const listName = req.body.listName
+
+  if (listName === 'Today') {
+    // Todo.deleteOne({_id: checkedItem})
+    // .then((data) => console.log(data, 'Successfully deleted'))
+    // .catch((err) => console.log(err))
+
+    //Method TWO
+    Todo.findByIdAndRemove({_id: checkedItem})
+    .then(() => console.log("Successfully deleted checked item."))
+    .catch((err) => console.log("Delete Unsuccessfull"))
+    res.redirect("/")
+  } else {
+    Listy.findOneAndUpdate(
+      {name: listName}, {$pull: {items: {_id: checkedItem}}}).then(f_item => {
+        res.redirect("/" + listName)
+      }).catch((err) => console.log(err))
+  }
+
+
 })
 
-
-app.get("/work", function(req, res){
-  res.render("list", {listTitle: "Work List", newListItems: workItems});
-});
 
 app.get("/about", function(req, res){
   res.render("about");
