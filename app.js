@@ -29,6 +29,16 @@ const todoSchema = new mongoose.Schema({
   }
 })
 
+const listSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, 'Please provide a name']
+  },
+  items: [todoSchema]
+})
+
+const Listy = mongoose.model("Listy", listSchema)
+
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(express.static("public"));
@@ -76,6 +86,32 @@ app.get("/", function(req, res){
 
 
 });
+
+//Creating Dynamic routes
+app.get("/:customListName", function(req, res){
+    const customListName = req.params.customListName;
+
+    Listy.findOne({name: customListName})
+      .then(itemFound => {
+        if (itemFound) {
+          console.log("Exists");
+        } else {
+          console.log("Doesn't exist");
+        }
+      })
+      .catch(error => {
+        console.error(error);
+      })
+
+    const list = new Listy({
+      name: customListName,
+      items: defaultItems
+    })
+  })
+
+
+
+
 
 app.post("/", function(req, res){
 
