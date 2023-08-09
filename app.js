@@ -94,19 +94,22 @@ app.get("/:customListName", function(req, res){
     Listy.findOne({name: customListName})
       .then(itemFound => {
         if (itemFound) {
-          console.log("Exists");
+          //Show an existing list
+          res.render("list", {listTitle: itemFound.name, newListItems: itemFound.items})
         } else {
-          console.log("Doesn't exist");
+          //Create a new list
+          const list = new Listy({
+            name: customListName,
+            items: defaultItems
+          })
+          list.save()
+          res.redirect("/" + customListName)
         }
       })
       .catch(error => {
         console.error(error);
       })
 
-    const list = new Listy({
-      name: customListName,
-      items: defaultItems
-    })
   })
 
 
